@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-var colors = map[string][]byte{
+var colors = map[string][]int{
 	"black":   {0, 0, 0},
 	"red":     {1, 0, 0},
 	"green":   {0, 1, 0},
@@ -27,7 +27,7 @@ var led_types = map[string]int{
 	"radio":          4,
 }
 
-var led_positions = [][]byte{
+var led_positions = [][]int{
 	{15, 13, 14},
 	{12, 10, 11},
 	{9, 1, 8},
@@ -35,7 +35,7 @@ var led_positions = [][]byte{
 	{5, 7, 6},
 }
 
-var leds = []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+var leds = []int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 // var leds = []byte{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 
@@ -55,7 +55,7 @@ func main() {
 	setLEDs()
 }
 
-func _setColor(position int, color []byte) {
+func _setColor(position int, color []int) {
 	var indexes = led_positions[position]
 	for i := 0; i < 3; i++ {
 		leds[indexes[i]] = color[i]
@@ -65,55 +65,66 @@ func _setColor(position int, color []byte) {
 func setColor(position int, color string, flash bool) {
 	_setColor(position, colors[color])
 
-	p(flash)
+}
 
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
 }
 
 func setLEDs() {
 
-	writetofile("/sys/kernel/debug/omap_mux/lcd_data15", []byte("27"))
-	writetofile("/sys/kernel/debug/omap_mux/lcd_data14", []byte("27"))
-	writetofile("/sys/kernel/debug/omap_mux/uart0_ctsn", []byte("27"))
-	writetofile("/sys/kernel/debug/omap_mux/mii1_col", []byte("27"))
+	writetofile("/sys/kernel/debug/omap_mux/lcd_data15", "27")
+	writetofile("/sys/kernel/debug/omap_mux/lcd_data14", "27")
+	writetofile("/sys/kernel/debug/omap_mux/uart0_ctsn", "27")
+	writetofile("/sys/kernel/debug/omap_mux/mii1_col", "27")
 
 	if _, err := os.Stat("/sys/class/gpio/gpio11/direction"); os.IsNotExist(err) {
-		writetofile("/sys/class/gpio/export", []byte("11"))
+		writetofile("/sys/class/gpio/export", "11")
 	}
 
 	if _, err := os.Stat("/sys/class/gpio/gpio10/direction"); os.IsNotExist(err) {
-		writetofile("/sys/class/gpio/export", []byte("10"))
+		writetofile("/sys/class/gpio/export", "10")
 	}
 
 	if _, err := os.Stat("/sys/class/gpio/gpio40/direction"); os.IsNotExist(err) {
-		writetofile("/sys/class/gpio/export", []byte("40"))
+		writetofile("/sys/class/gpio/export", "40")
 	}
 
 	if _, err := os.Stat("/sys/class/gpio/gpio96/direction"); os.IsNotExist(err) {
-		writetofile("/sys/class/gpio/export", []byte("96"))
+		writetofile("/sys/class/gpio/export", "96")
 	}
 
-	writetofile("/sys/class/gpio/gpio11/direction", []byte("low"))
-	writetofile("/sys/class/gpio/gpio10/direction", []byte("low"))
-	writetofile("/sys/class/gpio/gpio40/direction", []byte("low"))
-	writetofile("/sys/class/gpio/gpio96/direction", []byte("low"))
+	writetofile("/sys/class/gpio/gpio11/direction", "low")
+	writetofile("/sys/class/gpio/gpio10/direction", "low")
+	writetofile("/sys/class/gpio/gpio40/direction", "low")
+	writetofile("/sys/class/gpio/gpio96/direction", "low")
 
 	for i := 0; i < len(leds); i++ {
-		writetofile("/sys/class/gpio/gpio40/value", leds[i:i+1])
-		p(leds[i : i+1])
-		writetofile("/sys/class/gpio/gpio96/value", []byte("1"))
-		writetofile("/sys/class/gpio/gpio96/value", []byte("0"))
+		writetofile("/sys/class/gpio/gpio40/value", fmt.Sprintf(leds[i:i+1]))
+		writetofile("/sys/class/gpio/gpio96/value", "1")
+		writetofile("/sys/class/gpio/gpio96/value", "0")
 	}
 
-	writetofile("/sys/class/gpio/gpio11/value", []byte("1"))
-	writetofile("/sys/class/gpio/gpio11/value", []byte("0"))
+	writetofile("/sys/class/gpio/gpio11/value", "1")
+	writetofile("/sys/class/gpio/gpio11/value", "0")
 }
 
-func writetofile(fn string, val []byte) error {
+func writetofile(fn string, val string) error {
 	df, err := os.OpenFile(fn, os.O_WRONLY|os.O_SYNC, 0666)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Fprintln(df, val)
+
+	num, err := fmt.Fprintln(df, val)
+
+	if err != nil {
+		panic(err)
+	} else {
+		p(num)
+	}
+
 	df.Close()
 	return nil
 }
