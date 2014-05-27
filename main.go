@@ -35,9 +35,9 @@ var led_positions = [][]byte{
 	{5, 7, 6},
 }
 
-// var leds = []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+var leds = []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
-var leds = []byte{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+// var leds = []byte{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 
 var p = fmt.Println
 
@@ -48,7 +48,10 @@ func main() {
 
 	fmt.Print("You passed: ")
 	fmt.Println(*colorPtr)
-	setColor(1, *colorPtr, false)
+	for i := 0; i < 5; i++ {
+		setColor(i, *colorPtr, false)
+	}
+
 	setLEDs()
 }
 
@@ -106,7 +109,6 @@ func setLEDs() {
 }
 
 func writetofile(fn string, val []byte) error {
-	p("writing to" + fn)
 	df, err := os.OpenFile(fn, os.O_WRONLY|os.O_SYNC, 0666)
 	if err != nil {
 		panic(err)
