@@ -102,7 +102,7 @@ func setLEDs() {
 	writetofile("/sys/class/gpio/gpio96/direction", "low")
 
 	for i := 0; i < len(leds); i++ {
-		writetofile("/sys/class/gpio/gpio40/value", fmt.Sprintf(leds[i:i+1]))
+		writetofile("/sys/class/gpio/gpio40/value", fmt.Sprintf("%d", leds[i:i+1]))
 		writetofile("/sys/class/gpio/gpio96/value", "1")
 		writetofile("/sys/class/gpio/gpio96/value", "0")
 	}
