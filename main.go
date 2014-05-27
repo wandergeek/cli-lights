@@ -41,12 +41,6 @@ var leds = []byte{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 
 var p = fmt.Println
 
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
-
 func main() {
 
 	colorPtr := flag.String("color", "black", "give me a color mofo")
@@ -112,10 +106,10 @@ func setLEDs() {
 }
 
 func writetofile(fn string, val []byte) error {
-	df, err := os.OpenFile(fn,
-		os.O_WRONLY|os.O_SYNC, 0666)
+	p("writing to" + fn)
+	df, err := os.OpenFile(fn, os.O_WRONLY|os.O_SYNC, 0666)
 	if err != nil {
-		return err
+		panic(err)
 	}
 	fmt.Fprintln(df, val)
 	df.Close()
